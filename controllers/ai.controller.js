@@ -6,8 +6,14 @@ const client = new Groq({
 });
 
 
-// Common function to call AI
+
+// Common AI function
 const generateAI = async (prompt) => {
+
+    if (!process.env.GROQ_API_KEY) {
+        throw new Error("Missing Groq API key");
+    }
+
 
     const response = await client.chat.completions.create({
 
@@ -25,6 +31,8 @@ const generateAI = async (prompt) => {
 
     return response.choices[0].message.content;
 };
+
+
 
 
 
@@ -51,11 +59,13 @@ const askAI = async (req, res) => {
         });
 
 
+
     } catch (error) {
 
-        res.status(500).json({
-            message: "AI error",
-            error: error.message
+        console.log("AI Error:", error.message);
+
+        res.status(503).json({
+            message: "AI service temporarily unavailable"
         });
 
     }
@@ -65,7 +75,9 @@ const askAI = async (req, res) => {
 
 
 
-// Summarize note/content
+
+
+// Summarize content
 const summarize = async (req, res) => {
 
     try {
@@ -86,8 +98,8 @@ const summarize = async (req, res) => {
 Summarize this content.
 
 Give:
-- important points
-- key concepts
+- main points
+- important concepts
 - simple explanation
 
 Content:
@@ -105,13 +117,17 @@ ${content}
 
     } catch (error) {
 
-        res.status(500).json({
-            message: "AI error",
-            error: error.message
+        console.log("AI Error:", error.message);
+
+        res.status(503).json({
+            message: "AI service temporarily unavailable"
         });
 
     }
 };
+
+
+
 
 
 
@@ -140,19 +156,19 @@ Create a quiz on ${topic}.
 
 Make 5 multiple choice questions.
 
-Return in this format:
+Return ONLY valid JSON.
 
-Question:
-Options:
-A)
-B)
-C)
-D)
+Format:
 
-Correct Answer:
+[
+ {
+   "question":"",
+   "options":["","","",""],
+   "answer":""
+ }
+]
 `
         );
-
 
 
         res.status(200).json({
@@ -163,9 +179,10 @@ Correct Answer:
 
     } catch (error) {
 
-        res.status(500).json({
-            message: "AI error",
-            error: error.message
+        console.log("AI Error:", error.message);
+
+        res.status(503).json({
+            message: "AI service temporarily unavailable"
         });
 
     }
@@ -178,9 +195,9 @@ Correct Answer:
 
 
 
+
 // Explain topic
 const explain = async (req, res) => {
-
 
     try {
 
@@ -202,7 +219,7 @@ Explain this topic like I am a beginner.
 Use:
 - simple words
 - examples
-- analogies
+- real life analogy
 
 Topic:
 
@@ -220,17 +237,14 @@ ${content}
 
     } catch (error) {
 
-        res.status(500).json({
-            message: "AI error",
-            error: error.message
+        console.log("AI Error:", error.message);
+
+        res.status(503).json({
+            message: "AI service temporarily unavailable"
         });
 
     }
-
 };
-
-
-
 
 
 module.exports = {

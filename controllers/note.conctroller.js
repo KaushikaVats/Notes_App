@@ -13,25 +13,24 @@ const getNotesBySubName = async (req, res) => {
     }
 }
 const getMyNotes = async (req, res) => {
+
     try {
 
         const notes = await Note.find({
             user: req.user
         });
 
-        if (notes.length === 0) {
-            return res.status(404).json({
-                message: "No notes found"
-            });
-        }
 
         res.status(200).json(notes);
 
+
     } catch (error) {
+
         res.status(500).json({
             message: "Server error",
             error: error.message
         });
+
     }
 }
 const createNote = async (req, res) => {

@@ -95,12 +95,25 @@ const summarize = async (req, res) => {
 
         const summary = await generateAI(
             `
-Summarize this content.
+Return ONLY JSON.
+No markdown.
+No backticks.
 
-Give:
-- main points
-- important concepts
-- simple explanation
+Format:
+
+{
+ "mainPoints":[
+   "point 1",
+   "point 2",
+   "point 3"
+ ],
+ "importantConcepts":[
+   "concept 1",
+   "concept 2"
+ ],
+ "explanation":"simple explanation"
+ }
+
 
 Content:
 
@@ -109,8 +122,29 @@ ${content}
         );
 
 
+        let parsedSummary;
+
+
+        try {
+
+            parsedSummary = JSON.parse(summary);
+
+        } catch (err) {
+
+            console.log("JSON parse failed");
+
+            parsedSummary = {
+                mainPoints: [summary],
+                importantConcepts: [],
+                explanation: ""
+            };
+
+        }
+
+
+
         res.status(200).json({
-            summary
+            summary: parsedSummary
         });
 
 
@@ -119,11 +153,13 @@ ${content}
 
         console.log("AI Error:", error.message);
 
+
         res.status(503).json({
             message: "AI service temporarily unavailable"
         });
 
     }
+
 };
 
 
@@ -172,7 +208,7 @@ Format:
 
 
         res.status(200).json({
-            quiz
+            quiz: JSON.parse(quiz)
         });
 
 
@@ -187,14 +223,6 @@ Format:
 
     }
 };
-
-
-
-
-
-
-
-
 
 // Explain topic
 const explain = async (req, res) => {
@@ -214,36 +242,89 @@ const explain = async (req, res) => {
 
         const explanation = await generateAI(
             `
-Explain this topic like I am a beginner.
+Return ONLY valid JSON.
 
-Use:
-- simple words
-- examples
-- real life analogy
+Do not use markdown.
+Do not add backticks.
 
-Topic:
+Format:
+
+{
+ "topic":"topic name",
+ "explanation":"simple beginner friendly explanation",
+ "examples":[
+    "example 1",
+    "example 2"
+ ],
+ "keyPoints":[
+    "point 1",
+    "point 2"
+ ]
+}
+
+
+Explain this topic:
 
 ${content}
+
 `
         );
 
 
 
+        let parsedExplanation;
+
+
+        try {
+
+            parsedExplanation = JSON.parse(explanation);
+
+
+        } catch (error) {
+
+
+            console.log("JSON parse failed");
+
+
+            parsedExplanation = {
+
+                topic: "Explanation",
+
+                explanation: explanation,
+
+                examples: [],
+
+                keyPoints: []
+
+            };
+
+        }
+
+
+
+
         res.status(200).json({
-            explanation
+
+            explanation: parsedExplanation
+
         });
 
 
 
     } catch (error) {
 
+
         console.log("AI Error:", error.message);
 
+
         res.status(503).json({
+
             message: "AI service temporarily unavailable"
+
         });
 
     }
+
 };
 
 

@@ -53,7 +53,7 @@ function Login() {
             alert("Login successful");
 
 
-            navigate("/");
+            navigate("/dashboard");
 
 
         } catch (error) {

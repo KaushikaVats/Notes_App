@@ -1,3 +1,4 @@
+import jsPDF from "jspdf";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import Navbar from "../components/Navbar";
@@ -248,7 +249,25 @@ function Dashboard() {
     }
 
 
+    const exportPDF = (note) => {
 
+        const doc = new jsPDF();
+
+        doc.setFontSize(20);
+        doc.text(note.title, 20, 20);
+
+        doc.setFontSize(14);
+        doc.text(`Subject: ${note.subject}`, 20, 35);
+
+        doc.setFontSize(12);
+
+        const splitContent = doc.splitTextToSize(note.content, 170);
+
+        doc.text(splitContent, 20, 50);
+
+        doc.save(`${note.title}.pdf`);
+
+    };
 
     const filteredNotes = notes.filter((note) => {
 
@@ -681,7 +700,7 @@ function Dashboard() {
 
                             <div
                                 key={note._id}
-                                className="bg-gray-900 rounded-lg p-5 shadow-md mb-5 border border-gray-800"
+                                className=" flex flex-wrap gap-4 mt-4 bg-gray-900 rounded-lg p-5 shadow-md mb-5 border border-gray-800"
                             >
 
                                 {/* Keep ALL of your existing note card code here */}
@@ -733,7 +752,12 @@ function Dashboard() {
                                 >
                                     📝 Quiz Me
                                 </button>
-
+                                <button
+                                    onClick={() => exportPDF(note)}
+                                    className="bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-white"
+                                >
+                                    📄 Export PDF
+                                </button>
                             </div>
 
 

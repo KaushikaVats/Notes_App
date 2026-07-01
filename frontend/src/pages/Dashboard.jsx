@@ -8,6 +8,7 @@ function Dashboard() {
     const [aiResponse, setAiResponse] = useState(null);
     const [loadingAI, setLoadingAI] = useState(false);
     const [notes, setNotes] = useState([]);
+    const [search, setSearch] = useState("");
 
 
     const [editing, setEditing] = useState(null);
@@ -249,8 +250,20 @@ function Dashboard() {
 
 
 
+    const filteredNotes = notes.filter((note) => {
 
+        const keyword = search.toLowerCase();
 
+        return (
+            note.title.toLowerCase().includes(keyword) ||
+            note.subject.toLowerCase().includes(keyword) ||
+            note.content.toLowerCase().includes(keyword)
+        );
+
+    });
+
+    console.log(search);
+    console.log(filteredNotes);
     return (
 
 
@@ -263,7 +276,13 @@ function Dashboard() {
                     My Notes
                 </h1>
 
-
+                <input
+                    type="text"
+                    placeholder="🔍 Search notes by title, subject or content..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 text-white mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 {/* Create Note */}
 
                 <form onSubmit={createNote} className="bg-gray-900 p-6 rounded-lg shadow-md mb-8 flex flex-col gap-4">
@@ -650,29 +669,35 @@ function Dashboard() {
 
 
                 {
-                    notes.map(note => (
+                    filteredNotes.length === 0 ? (
 
-                        <div
-                            key={note._id}
-                            className="bg-gray-900 rounded-lg p-5 shadow-md mb-5 border border-gray-800"
-                        >
+                        <div className="text-center text-gray-400 py-10">
+                            No matching notes found.
+                        </div>
 
-                            <h3 className="text-2xl font-bold text-white mb-2">
-                                {note.title}
-                            </h3>
+                    ) : (
 
-                            <p className="text-gray-300 mb-4">
-                                {note.content}
-                            </p>
-
-                            <p className="text-blue-400 mb-3">
-                                Subject: {note.subject}
-                            </p>
+                        filteredNotes.map(note => (
 
                             <div
-                                className="flex flex-wrap gap-2"
-
+                                key={note._id}
+                                className="bg-gray-900 rounded-lg p-5 shadow-md mb-5 border border-gray-800"
                             >
+
+                                {/* Keep ALL of your existing note card code here */}
+
+                                <h3 className="text-2xl font-bold text-white mb-2">
+                                    {note.title}
+                                </h3>
+
+                                <p className="text-blue-400 mb-3">
+                                    Subject: {note.subject}
+                                </p>
+
+                                <p className="text-gray-300 mb-4">
+                                    {note.content}
+                                </p>
+
 
                                 <button
                                     onClick={() => editNote(note)}
@@ -711,9 +736,9 @@ function Dashboard() {
 
                             </div>
 
-                        </div>
 
-                    ))
+                        ))
+                    )
                 }
 
 

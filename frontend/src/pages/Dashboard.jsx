@@ -92,7 +92,21 @@ function Dashboard() {
 
 
 
+    const toggleFavorite = async (id) => {
 
+        try {
+
+            await api.patch(`/notes/${id}/favorite`);
+
+            getNotes();
+
+        } catch (error) {
+
+            console.log(error.response?.data);
+
+        }
+
+    };
 
     // Delete Note
     const deleteNote = async (id) => {
@@ -280,9 +294,19 @@ function Dashboard() {
         );
 
     });
+    const totalNotes = notes.length;
 
-    console.log(search);
-    console.log(filteredNotes);
+    const totalSubjects = new Set(
+        notes.map(note => note.subject)
+    ).size;
+
+    const totalWords = notes.reduce((total, note) => {
+        return total + note.content.split(/\s+/).filter(word => word).length;
+    }, 0);
+
+    const favoriteNotes = filteredNotes.filter(note => note.isFavorite);
+
+    const otherNotes = filteredNotes.filter(note => !note.isFavorite);
     return (
 
 
@@ -294,7 +318,39 @@ function Dashboard() {
                 <h1 className="text-4xl font-bold mb-6">
                     My Notes
                 </h1>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
+                    <div className="bg-gray-900 rounded-lg p-5 shadow-md border border-gray-800">
+                        <h2 className="text-gray-400 text-sm">
+                            Total Notes
+                        </h2>
+
+                        <p className="text-3xl font-bold text-blue-400">
+                            {totalNotes}
+                        </p>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-lg p-5 shadow-md border border-gray-800">
+                        <h2 className="text-gray-400 text-sm">
+                            Subjects
+                        </h2>
+
+                        <p className="text-3xl font-bold text-green-400">
+                            {totalSubjects}
+                        </p>
+                    </div>
+
+                    <div className="bg-gray-900 rounded-lg p-5 shadow-md border border-gray-800">
+                        <h2 className="text-gray-400 text-sm">
+                            Total Words
+                        </h2>
+
+                        <p className="text-3xl font-bold text-yellow-400">
+                            {totalWords}
+                        </p>
+                    </div>
+
+                </div>
                 <input
                     type="text"
                     placeholder="🔍 Search notes by title, subject or content..."
@@ -696,72 +752,181 @@ function Dashboard() {
 
                     ) : (
 
-                        filteredNotes.map(note => (
+                        <>
 
-                            <div
-                                key={note._id}
-                                className=" flex flex-wrap gap-4 mt-4 bg-gray-900 rounded-lg p-5 shadow-md mb-5 border border-gray-800"
-                            >
+                            {/* Favorite Notes */}
 
-                                {/* Keep ALL of your existing note card code here */}
+                            {
+                                favoriteNotes.length > 0 && (
 
-                                <h3 className="text-2xl font-bold text-white mb-2">
-                                    {note.title}
-                                </h3>
+                                    <>
+                                        <h2 className="text-2xl font-bold mt-8 mb-4 text-pink-400">
+                                            ❤️ Favorite Notes
+                                        </h2>
 
-                                <p className="text-blue-400 mb-3">
-                                    Subject: {note.subject}
-                                </p>
+                                        {
+                                            favoriteNotes.map(note => (
 
-                                <p className="text-gray-300 mb-4">
-                                    {note.content}
-                                </p>
+                                                <div
+                                                    key={note._id}
+                                                    className="flex flex-wrap gap-4 mt-4 bg-gray-900 rounded-lg p-5 shadow-md mb-5 border border-pink-500"
+                                                >
 
+                                                    <h3 className="text-2xl font-bold text-white mb-2">
+                                                        {note.title}
+                                                    </h3>
 
-                                <button
-                                    onClick={() => editNote(note)}
-                                    className="bg-yellow-500 hover:bg-yellow-600 px-3 py-2 rounded text-white"
-                                >
-                                    ✏️ Edit
-                                </button>
+                                                    <p className="text-blue-400 mb-3">
+                                                        Subject: {note.subject}
+                                                    </p>
 
-                                <button
-                                    onClick={() => deleteNote(note._id)}
-                                    className="bg-red-500 hover:bg-red-600 px-3 py-2 rounded text-white"
-                                >
-                                    🗑 Delete
-                                </button>
+                                                    <p className="text-gray-300 mb-4">
+                                                        {note.content}
+                                                    </p>
 
-                                <button
-                                    onClick={() => askAI("summarize", note)}
-                                    className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-white"
-                                >
-                                    🤖 Summarize
-                                </button>
+                                                    <button
+                                                        onClick={() => editNote(note)}
+                                                        className="bg-yellow-500 hover:bg-yellow-600 px-3 py-2 rounded text-white"
+                                                    >
+                                                        ✏️ Edit
+                                                    </button>
 
-                                <button
-                                    onClick={() => askAI("explain", note)}
-                                    className="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-white"
-                                >
-                                    📖 Explain
-                                </button>
+                                                    <button
+                                                        onClick={() => deleteNote(note._id)}
+                                                        className="bg-red-500 hover:bg-red-600 px-3 py-2 rounded text-white"
+                                                    >
+                                                        🗑 Delete
+                                                    </button>
 
-                                <button
-                                    onClick={() => askAI("quiz", note)}
-                                    className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-white"
-                                >
-                                    📝 Quiz Me
-                                </button>
-                                <button
-                                    onClick={() => exportPDF(note)}
-                                    className="bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-white"
-                                >
-                                    📄 Export PDF
-                                </button>
-                            </div>
+                                                    <button
+                                                        onClick={() => askAI("summarize", note)}
+                                                        className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-white"
+                                                    >
+                                                        🤖 Summarize
+                                                    </button>
 
+                                                    <button
+                                                        onClick={() => askAI("explain", note)}
+                                                        className="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-white"
+                                                    >
+                                                        📖 Explain
+                                                    </button>
 
-                        ))
+                                                    <button
+                                                        onClick={() => askAI("quiz", note)}
+                                                        className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-white"
+                                                    >
+                                                        📝 Quiz Me
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => exportPDF(note)}
+                                                        className="bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-white"
+                                                    >
+                                                        📄 Export PDF
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => toggleFavorite(note._id)}
+                                                        className="bg-pink-600 hover:bg-pink-700 px-3 py-2 rounded text-white"
+                                                    >
+                                                        ❤️ Favorited
+                                                    </button>
+
+                                                </div>
+
+                                            ))
+                                        }
+                                    </>
+
+                                )
+                            }
+
+                            {/* Other Notes */}
+
+                            <h2 className="text-2xl font-bold mt-10 mb-4">
+                                📚 My Notes
+                            </h2>
+
+                            {
+                                otherNotes.map(note => (
+
+                                    <div
+                                        key={note._id}
+                                        className="flex flex-wrap gap-4 mt-4 bg-gray-900 rounded-lg p-5 shadow-md mb-5 border border-gray-800"
+                                    >
+
+                                        <h3 className="text-2xl font-bold text-white mb-2">
+                                            {note.title}
+                                        </h3>
+
+                                        <p className="text-blue-400 mb-3">
+                                            Subject: {note.subject}
+                                        </p>
+
+                                        <p className="text-gray-300 mb-4">
+                                            {note.content}
+                                        </p>
+
+                                        <button
+                                            onClick={() => editNote(note)}
+                                            className="bg-yellow-500 hover:bg-yellow-600 px-3 py-2 rounded text-white"
+                                        >
+                                            ✏️ Edit
+                                        </button>
+
+                                        <button
+                                            onClick={() => deleteNote(note._id)}
+                                            className="bg-red-500 hover:bg-red-600 px-3 py-2 rounded text-white"
+                                        >
+                                            🗑 Delete
+                                        </button>
+
+                                        <button
+                                            onClick={() => askAI("summarize", note)}
+                                            className="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-white"
+                                        >
+                                            🤖 Summarize
+                                        </button>
+
+                                        <button
+                                            onClick={() => askAI("explain", note)}
+                                            className="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded text-white"
+                                        >
+                                            📖 Explain
+                                        </button>
+
+                                        <button
+                                            onClick={() => askAI("quiz", note)}
+                                            className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-white"
+                                        >
+                                            📝 Quiz Me
+                                        </button>
+
+                                        <button
+                                            onClick={() => exportPDF(note)}
+                                            className="bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded text-white"
+                                        >
+                                            📄 Export PDF
+                                        </button>
+
+                                        <button
+                                            onClick={() => toggleFavorite(note._id)}
+                                            className={`px-3 py-2 rounded text-white ${note.isFavorite
+                                                ? "bg-pink-600 hover:bg-pink-700"
+                                                : "bg-gray-600 hover:bg-gray-700"
+                                                }`}
+                                        >
+                                            {note.isFavorite ? "❤️ Favorited" : "🤍 Favorite"}
+                                        </button>
+
+                                    </div>
+
+                                ))
+                            }
+
+                        </>
+
                     )
                 }
 

@@ -17,7 +17,10 @@ const noteSchema = new mongoose.Schema(
             ref: "User",
             required: true
         },
-
+        isFavorite: {
+            type: Boolean,
+            default: false
+        },
         subject: {
             type: String,
             required: true

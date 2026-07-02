@@ -12,6 +12,42 @@ const getNotesBySubName = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 }
+const toggleFavorite = async (req, res) => {
+
+    try {
+
+        const { noteId } = req.params;
+
+        const note = await Note.findOne({
+            _id: noteId,
+            user: req.user
+        });
+
+        if (!note) {
+            return res.status(404).json({
+                message: "Note not found"
+            });
+        }
+
+        note.isFavorite = !note.isFavorite;
+
+        await note.save();
+
+        res.status(200).json({
+            message: "Favorite updated",
+            note
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: "Server Error",
+            error: error.message
+        });
+
+    }
+
+};
 const getMyNotes = async (req, res) => {
 
     try {
@@ -137,8 +173,10 @@ const deleteNote = async (req, res) => {
 };
 module.exports = {
     getNotesBySubName,
+    toggleFavorite,
     getMyNotes,
     createNote,
     updateNote,
     deleteNote
+
 }
